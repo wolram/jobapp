@@ -1,10 +1,10 @@
 {
     "extension_name": {
-        "message": "jobapp",
+        "message": "GoldMedal Jobs",
         "description": "The display name for the extension."
     },
     "extension_description": {
-        "message": "This is jobapp. You should tell us what your extension does here.",
+        "message": "Collect job listings from LinkedIn and Gupy, match them to your career profiles, and get scored recommendations.",
         "description": "Description of what the extension does."
     }
 }
