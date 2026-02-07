@@ -21,7 +21,11 @@
 
     "content_scripts": [{
         "js": [ "content.js" ],
-        "matches": [ "*://example.com/*" ]
+        "matches": [
+            "*://*.linkedin.com/jobs/*",
+            "*://*.linkedin.com/search/results/jobs/*",
+            "*://*.gupy.io/*"
+        ]
     }],
 
     "action": {
@@ -33,5 +37,13 @@
         "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'"
     },
 
-    "permissions": [ ]
+    "permissions": [
+        "storage",
+        "activeTab"
+    ],
+
+    "host_permissions": [
+        "*://*.linkedin.com/*",
+        "*://*.gupy.io/*"
+    ]
 }

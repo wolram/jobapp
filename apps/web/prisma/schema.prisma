@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  name      String?
+  image     String?
+  locale    String   @default("en")
+  timezone  String   @default("UTC")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  accounts       Account[]
+  sessions       Session[]
+  careerProfiles CareerProfile[]
+  userTokens     UserToken[]
+  resumes        Resume[]
+  alerts         Alert[]
+
+  @@map("users")
+}
+
+// NextAuth required models
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @map("user_id") @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id") @db.Uuid
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// App models
+model CareerProfile {
+  id             String  @id @default(uuid()) @db.Uuid
+  userId         String  @map("user_id") @db.Uuid
+  title          String
+  functionArea   String? @map("function_area")
+  locationPref   String? @map("location_pref")
+  seniority      String?
+  workMode       String? @map("work_mode")
+  salaryMin      Float?  @map("salary_min")
+  salaryCurrency String? @map("salary_currency") @db.VarChar(3)
+  isActive       Boolean @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills ProfileSkill[]
+  scores ProfileOpportunityScore[]
+
+  @@map("career_profiles")
+}
+
+model ProfileSkill {
+  id        String  @id @default(uuid()) @db.Uuid
+  profileId String  @map("profile_id") @db.Uuid
+  skillName String  @map("skill_name")
+  weight    Int     @default(50)
+  required  Boolean @default(false)
+
+  profile CareerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("profile_skills")
+}
+
+model UserToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  tokenHash  String    @map("token_hash")
+  name       String
+  lastUsedAt DateTime? @map("last_used_at")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_tokens")
+}
+
+model Resume {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  fileUrl        String   @map("file_url")
+  parsedJson     Json?    @map("parsed_json")
+  consentVersion String   @map("consent_version")
+  consentedAt    DateTime @map("consented_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("resumes")
+}
+
+model Opportunity {
+  id             String    @id @default(uuid()) @db.Uuid
+  source         String
+  externalId     String?   @map("external_id")
+  url            String
+  title          String
+  company        String
+  location       String?
+  employmentType String?   @map("employment_type")
+  descriptionRaw String?   @map("description_raw") @db.Text
+  language       String?
+  postedAt       DateTime? @map("posted_at")
+  capturedAt     DateTime  @map("captured_at")
+  dedupeKey      String    @unique @map("dedupe_key")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  skills OpportunitySkill[]
+  scores ProfileOpportunityScore[]
+
+  @@map("opportunities")
+}
+
+model OpportunitySkill {
+  id            String @id @default(uuid()) @db.Uuid
+  opportunityId String @map("opportunity_id") @db.Uuid
+  skillName     String @map("skill_name")
+  confidence    Float  @default(0.5)
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@map("opportunity_skills")
+}
+
+model ProfileOpportunityScore {
+  id            String   @id @default(uuid()) @db.Uuid
+  profileId     String   @map("profile_id") @db.Uuid
+  opportunityId String   @map("opportunity_id") @db.Uuid
+  totalScore    Float    @map("total_score")
+  ruleScore     Float    @map("rule_score")
+  semanticScore Float    @map("semantic_score")
+  reasonsJson   Json     @map("reasons_json")
+  status        String   @default("new")
+  scoredAt      DateTime @map("scored_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  profile     CareerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  opportunity Opportunity   @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, opportunityId])
+  @@index([totalScore(sort: Desc), scoredAt(sort: Desc)])
+  @@map("profile_opportunity_scores")
+}
+
+model Alert {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  channel   String
+  frequency String    @default("daily")
+  threshold Int       @default(50)
+  lastSentAt DateTime? @map("last_sent_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
+}

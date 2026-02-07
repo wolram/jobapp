@@ -6,6 +6,50 @@
     <script type="module" src="popup.js"></script>
 </head>
 <body>
-    <strong>Hello World!</strong>
+    <div class="container">
+        <div class="header">
+            <h1>GoldMedal Jobs</h1>
+        </div>
+
+        <!-- Connection Setup (shown when not connected) -->
+        <div id="setup" class="section" style="display: none;">
+            <p class="description">Paste your Personal Access Token from the web app to connect.</p>
+            <div class="input-group">
+                <input type="text" id="tokenInput" placeholder="gmj_..." />
+                <input type="text" id="apiUrlInput" placeholder="API URL (optional)" />
+            </div>
+            <button id="connectBtn" class="btn btn-primary">Connect</button>
+            <p id="connectError" class="error" style="display: none;"></p>
+        </div>
+
+        <!-- Status (shown when connected) -->
+        <div id="status" class="section" style="display: none;">
+            <div class="status-row">
+                <span class="label">Status</span>
+                <span id="connectionStatus" class="badge badge-success">Connected</span>
+            </div>
+            <div class="status-row">
+                <span class="label">Last sync</span>
+                <span id="lastSync" class="value">Never</span>
+            </div>
+            <div class="status-row">
+                <span class="label">Jobs synced</span>
+                <span id="syncCount" class="value">0</span>
+            </div>
+            <div class="status-row">
+                <span class="label">Queue</span>
+                <span id="queueSize" class="value">0</span>
+            </div>
+            <div class="actions">
+                <button id="syncBtn" class="btn btn-primary">Sync Now</button>
+                <button id="collectBtn" class="btn btn-secondary">Collect Page</button>
+            </div>
+            <button id="disconnectBtn" class="btn btn-danger">Disconnect</button>
+        </div>
+
+        <div class="footer">
+            <a id="dashboardLink" href="#" target="_blank">Open Dashboard</a>
+        </div>
+    </div>
 </body>
 </html>
