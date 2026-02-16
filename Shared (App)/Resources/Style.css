@@ -44,15 +44,19 @@ body.platform-ios .platform-mac {
     display: none;
 }
 
-body:not(.state-on, .state-off) :is(.state-on, .state-off) {
+body:not(.state-on, .state-off, .state-error) :is(.state-on, .state-off, .state-error) {
     display: none;
 }
 
-body.state-on :is(.state-off, .state-unknown) {
+body.state-on :is(.state-off, .state-unknown, .state-error) {
     display: none;
 }
 
-body.state-off :is(.state-on, .state-unknown) {
+body.state-off :is(.state-on, .state-unknown, .state-error) {
+    display: none;
+}
+
+body.state-error :is(.state-on, .state-off, .state-unknown) {
     display: none;
 }
 
