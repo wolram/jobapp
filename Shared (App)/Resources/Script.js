@@ -17,6 +17,11 @@ function show(platform, enabled, useSettingsInsteadOfPreferences) {
     }
 }
 
+function showError() {
+    document.body.classList.remove('state-on', 'state-off');
+    document.body.classList.add('state-error');
+}
+
 function openPreferences() {
     webkit.messageHandlers.controller.postMessage("open-preferences");
 }

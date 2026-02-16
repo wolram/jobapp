@@ -44,7 +44,9 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
 
         SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionBundleIdentifier) { (state, error) in
             guard let state = state, error == nil else {
-                // Insert code to inform the user that something went wrong.
+                DispatchQueue.main.async {
+                    webView.evaluateJavaScript("showError()")
+                }
                 return
             }
 
@@ -67,7 +69,14 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
 
         SFSafariApplication.showPreferencesForExtension(withIdentifier: extensionBundleIdentifier) { error in
             guard error == nil else {
-                // Insert code to inform the user that something went wrong.
+                DispatchQueue.main.async {
+                    let alert = NSAlert()
+                    alert.messageText = "Could not open Safari Extensions preferences."
+                    alert.informativeText = error?.localizedDescription ?? "An unknown error occurred."
+                    alert.alertStyle = .warning
+                    alert.addButton(withTitle: "OK")
+                    alert.runModal()
+                }
                 return
             }
 
